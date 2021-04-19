@@ -8,9 +8,15 @@
         mov     byte [203h], "V"
         
         ;Direccionamiento directo
-        mov     AX, 200h
-        mov     CX, [201h]
-        mov     DX, [202h + DI]
+        ;copiar el valor 200h a AX
+        mov     AX, [200h]
+        ;Copiar el valor de 201h a CX indrecto por registro
+        mov     BX, [201h]
+        mov     CX, [BX]
+        ;Copiar el valor de 202h DX usando indirc base mas indice
+        mov     BX, [202h]
+        mov     DX, [BX + DI]
+        ;Copiar el valor de 203h a DI usando dirc relativo por registro.
         mov     DI, [SI + 203h]
-
+        
         int 20h
