@@ -19,14 +19,7 @@
  
 
 ;pass
-pass 	db 	"george", "$"
-
-msg1	db	"pass: ", "$"
-msg2 	db 	"BIENVENIDO", "$"
-msg3 	db 	"INCORRECTO", "$"
-
-setMess 	times 	 6 	db	" " 
-nc equ 6	
+	
 
 ; FUNCIONES
 
@@ -70,4 +63,14 @@ readChar:
     	mov 	AH, 09h
     	int 	21h
     	ret
+
+pass 	db 	"george", "$"
+
+msg1	db	"pass: ", "$"
+msg2 	db 	"BIENVENIDO", "$"
+msg3 	db 	"INCORRECTO", "$"
+
+setMess 	times 	 6 	db	" " 
+nc equ 6
+len equ $-pass + 10;
 
