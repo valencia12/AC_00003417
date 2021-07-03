@@ -1,74 +1,73 @@
-.model small
-.stack
-.data
 
-    cadena1 db 10 dup(' '),'$'
-    cadena2 db 10 dup(' '),'$'
-    msj1 db 'Las cadenas SI son iguales$'
-    msj2 db 'Las cadenas NO son iguales$'
+; MAIN
+	org 	100h
 
-.code
-.startup
+	section	.text
 
-    mov ah,06h         ; peticion de recorrido de la pantalla
-    mov al,00h         ; indica la pantalla completa
-    mov bh,07h         ; attributos de color y fondo 7 blanco 0 negro
-    mov cx,0000h       ; esquina superior izquierda renglon columna
-    mov dx,184fh       ; esquina inferior derecha renglon columna
-    int 10h 
+	
+	mov 	DX, msg1
+	call  	readChar
 
-    lea SI,cadena1
-    mov cx,10
- regresa:
-    mov ah,07h
-    int 21h
-    cmp al,13
-    je termina
-    mov [SI],al
-    inc SI
-    mov dl,al
-    mov ah,02h
-    int 21h
-    loop regresa
+	; leer frase del teclado
+	mov 	BP, setMess
+	call  	readCadena
 
-termina:
-    lea SI,cadena2
-    mov cx,10
-regresa2:
-    mov ah,07h
-    int 21h
-    cmp al,13
-    je termina2
-    mov [SI],al
-    inc SI
-    mov dl,al
-    mov ah,02h
-    int 21h
-    loop regresa2
+	int 	20h
 
-termina2:
+	section	.data
+ 
+ 
 
-    push ES
-    mov AX,DS
-    mov ES,AX
-    mov cx,10
-    lea SI,cadena1
-    lea DI,cadena2
-    repe cmpsb
-    JNE no_igual
-    jmp igual
-    pop ES
+;pass
+pass 	db 	"george", "$"
 
- no_igual:
-    lea DX,msj2
-    jmp fin
+msg1	db	"pass: ", "$"
+msg2 	db 	"BIENVENIDO", "$"
+msg3 	db 	"INCORRECTO", "$"
 
-igual:
-    lea DX,msj1
+setMess 	times 	 6 	db	" " 
+nc equ 6	
 
-fin:
-    mov ah,09h
-    int 21h
+; FUNCIONES
 
-.exit
-end
+
+
+
+WaitQe:
+        mov     AH, 01h         
+        int     21h
+        ret
+
+readCadena:
+        xor     SI, SI          ; SI = 0
+while:  
+        call    WaitQe    ; retorna un caracter en AL
+        cmp     AL, 0x0D        ; comparar AL con caracter EnterKey
+        je      exit            ; si se oprimió la tecla Enter entonces se termina el while
+        mov     [BP+SI], AL   	; guardar caracter en memoria
+        inc     SI              
+        jmp     while  
+exit:
+        mov     byte [BP + DI], "$" ; para agregar el $ al final
+        jmp     limpiar
+limpiar:
+        xor     SI, SI              ; limpiar el contador
+compararCadenas:
+        cmp     SI, nc    ; contraseña debe ser de cinco caracteres por lo que se compara con este largo definido
+        je      esIgual             ; si se llega a la última posición significa que todos los caracteres de la cadena son iguales a la contraseña
+        mov     AL, [pass + SI]    ; se recorre la cadena de la llave en la posición que lleve SI
+	cmp     [BP + SI], AL	    ; se compara con el caracter de la frase ingresada que este en la posición de SI guardada en la direccion BP 
+        jne     noIgual             ; si un caracter es diferente entonces salta a la cadena de incorrecto
+        inc     SI
+        jmp     compararCadenas     ; while
+esIgual:
+    	mov 	DX, msg2        ;Bienvenido
+    	jmp 	readChar
+noIgual:
+    	mov 	DX, msg3        ;Incorrecto
+    	jmp 	readChar
+readChar:
+    	mov 	AH, 09h
+    	int 	21h
+    	ret
+
